@@ -90,6 +90,11 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting up...")
 
+    # Initialize database connection pool
+    from .core.database_pool import db_pool
+
+    await db_pool.initialize()
+
     # Initialize Supabase connection pool
     try:
         from .core.supabase_connection_pool import supabase_pool
@@ -135,6 +140,13 @@ async def lifespan(app: FastAPI):
         logger.info("✅ Supabase connection pool closed")
     except Exception as e:
         logger.warning(f"⚠️ Error closing connection pool: {e}")
+
+    # Close database connection pool
+    try:
+        await db_pool.close()
+        logger.info("✅ Database connection pool closed")
+    except Exception as e:
+        logger.warning(f"⚠️ Error closing database pool: {e}")
 
 
 app = FastAPI(
